@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katrina's Clients</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link href="https://cdn.datatables.net/v/bs5/dt-2.3.1/b-3.2.3/datatables.min.css" rel="stylesheet" integrity="sha384-R7wkapUQamlWlio8XHReuG7aXbnzYTXnzDW6Q4TYPLZti5mC3bw+lCHq70tb653T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/v/bs5/dt-2.3.1/b-3.2.3/datatables.min.js" integrity="sha384-rxN9Fc7q8JWz3Cvn+kDax69/2Iw8AY+/0ODTk1A8ZbVct1HV/JC3fPex0qp62SWs" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
+</head>
+<body>
+    <div class="container pt-5">
+        <div class="row pt-5">
+            <div class="col pt-5 mx-auto">
+                <button class="btn btn-light float-end" onclick="logout();">Log Out</button>
+                <h2 class="text-center text-primary">Katrina's Clients</h2>
+                <table class="clients table table-light table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="data"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdGZpb2hmZWd0dGZhcGlhem5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Njc4ODc3ODEsImV4cCI6MTk4MzQ2Mzc4MX0.p_NdRX7tlhnAYxH1v2wSS85C620dxSpEhH-C3jwYBh8";
+        const url = "https://ectfiohfegttfapiazni.supabase.co";
+        const database = supabase.createClient(url, key);
+        let clients;
+
+        jQuery(document).ready(function () {
+             isLoggedIn();
+             renderItems()
+            .then(data => {
+                let table = new DataTable('.clients',{
+                    info: true,
+                    ordering: false,
+                    paging: true,
+                    layout: {
+                        topStart: {
+                            buttons: [
+                            {
+                                text: 'Add Client',
+                                class: 'btn-sm',
+                                action: function ( e, dt, node, config ) {
+                                    window.location = "addClient.html";
+                                }
+                            }
+                        ]
+                        },
+                        bottom: 'paging',
+                        bottomStart: null,
+                        bottomEnd: null
+                    },
+                });    
+            });
+        });
+
+        const logout = async() => {
+            let { error } = await database.auth.signOut()
+            if (!error) {
+                window.location = "index.html";
+            }
+        }
+       
+        const isLoggedIn = async () => {
+            if (!database.auth.currentSession) {
+                window.location = "index.html";
+            }
+        }
+
+        const renderItems = async () => {
+            const res = await database
+                .from("clients")
+                .select("*")
+            if (res) {
+                res.data.map(item => {
+                    let row = `<tr>
+                        <td>${item.firstName} ${item.lastName}</td>
+                        <td>${item.phone}</td>
+                        <td class="text-end">
+                            <button class="btn btn-primary btn-sm" onclick="window.location = 'editClient.html?id=${item.id}'">Edit</button>
+                            <button class="btn btn-primary btn-sm" onclick="window.location = 'clientNotes.html?id=${item.id}'">Notes</button>
+                        </td>
+                    </tr>`;
+                    document.getElementById("data").innerHTML += row;
+                });
+            }
+        }
+
+    </script>
+</body>
+</html>
