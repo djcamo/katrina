@@ -15,6 +15,42 @@
         integrity="sha384-rxN9Fc7q8JWz3Cvn+kDax69/2Iw8AY+/0ODTk1A8ZbVct1HV/JC3fPex0qp62SWs"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+    <style>
+        ul.timeline {
+            list-style-type: none;
+            position: relative;
+        }
+
+        ul.timeline:before {
+            content: ' ';
+            background: #d4d9df;
+            display: inline-block;
+            position: absolute;
+            left: 29px;
+            width: 2px;
+            height: 100%;
+            z-index: 400;
+        }
+
+        ul.timeline>li {
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+
+        ul.timeline>li:before {
+            content: ' ';
+            background: white;
+            display: inline-block;
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid darkmagenta;
+            left: 20px;
+            width: 20px;
+            height: 20px;
+            z-index: 400;
+        }
+    </style>
 </head>
 
 <body>
@@ -22,60 +58,17 @@
         <div class="row pt-5">
             <div class="col-8 pt-5 mx-auto">
                 <h2 class="text-center text-primary">Client Notes for David</h2>
-
-
-                <!-- <div class="accordion accordion-flush" id="accordionFlushExample">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapseOne" aria-expanded="false"
-                                aria-controls="flush-collapseOne">
-                                Accordion Item #1
-                            </button>
-                        </h2>
-                        <div id="flush-collapseOne" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">Placeholder content for this accordion, which is intended to
-                                demonstrate the <code>.accordion-flush</code> class. This is the first item’s accordion
-                                body.</div>
+                <button class="btn btn-secondary btn-sm" id="showNoteForm">Add Note</button>
+                <form class="pt-3" style="display:none" id="noteForm">
+                    <div class="row mb-3">
+                        <div class="col-sm-10">
+                            <textarea class="form-control" id="inputNote" required> </textarea>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapseTwo" aria-expanded="false"
-                                aria-controls="flush-collapseTwo">
-                                Accordion Item #2
-                            </button>
-                        </h2>
-                        <div id="flush-collapseTwo" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">Placeholder content for this accordion, which is intended to
-                                demonstrate the <code>.accordion-flush</code> class. This is the second item’s accordion
-                                body. Let’s imagine this being filled with some actual content.</div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapseThree" aria-expanded="false"
-                                aria-controls="flush-collapseThree">
-                                Accordion Item #3
-                            </button>
-                        </h2>
-                        <div id="flush-collapseThree" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">Placeholder content for this accordion, which is intended to
-                                demonstrate the <code>.accordion-flush</code> class. This is the third item’s accordion
-                                body. Nothing more exciting happening here in terms of content, but just filling up the
-                                space to make it look, at least at first glance, a bit more representative of how this
-                                would look in a real-world application.</div>
-                        </div>
-                    </div>
-                </div> -->
-
-
-
+                    <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                </form>
+                <ul class="timeline" id="data"></ul>
+                <button class="btn btn-primary btn-sm" onclick="window.location ='clients.html'">Back to Client List</button>
             </div>
         </div>
     </div>
@@ -86,11 +79,41 @@
         const url = "https://ectfiohfegttfapiazni.supabase.co";
         const database = supabase.createClient(url, key);
         let id = window.location.search.split("=")[1];
+        const showNoteForm = document.getElementById("showNoteForm");
+        const noteForm = document.getElementById("noteForm");
+        const data = document.getElementById("data");
 
         jQuery(document).ready(function () {
-
             getNotes(id);
 
+            showNoteForm.addEventListener("click", () => {
+                noteForm.style.display = "block";
+                showNoteForm.style.display = "none";
+            });
+
+            noteForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const note = document.getElementById("inputNote").value;
+                const res = await database
+                    .from("notes")
+                    .insert([{
+                        clientId: id,
+                        content: note
+                    }]);
+                if (res) {
+                    data.innerHTML = "";
+                    getNotes(id);
+                    noteForm.style.display = "none";
+                    showNoteForm.style.display = "block";
+                }
+            });
+
+        });
+
+        const formatter = new Intl.DateTimeFormat('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
         });
 
         const getNotes = async (id) => {
@@ -98,9 +121,18 @@
                 .from("notes")
                 .select("*")
                 .eq('clientId', id)
+                .order('created_at', { ascending: false });
             if (res) {
-                console.log(res.data);
-            }    
+                res.data.map(item => {
+                    const d = new Date(item.created_at);
+                    const formattedDate = formatter.format(d);
+                    let row = `<li>
+                        <a>${formattedDate} </a>
+                        <p> ${item.content} </p>
+                    </li>`;
+                    document.getElementById("data").innerHTML += row;
+                });
+            }
         }
 
 
