@@ -9,6 +9,7 @@
         integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.3.1/b-3.2.3/datatables.min.css" rel="stylesheet"
         integrity="sha384-R7wkapUQamlWlio8XHReuG7aXbnzYTXnzDW6Q4TYPLZti5mC3bw+lCHq70tb653T" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
         integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/v/bs5/dt-2.3.1/b-3.2.3/datatables.min.js"
@@ -18,10 +19,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
 </head>
 
-<body>
+<body class="bg-light">
     <div class="container pt-5">
         <div class="row pt-5">
             <div class="col-6 pt-5 mx-auto">
+                <div class="card p-5">
                 <h2 class="text-center text-primary">Add Client</h2>
                 <form id="addClient">
                     <div class="row mb-3">
@@ -55,9 +57,12 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm">Add Client</button>
+                    <button class="btn btn-light btn-sm" onclick="window.location ='clients.html'">Back to Client
+                        List</button>
                 </form>
             </div>
         </div>
+    </div>
     </div>
 
 
@@ -68,27 +73,27 @@
         const addForm = document.getElementById("addClient");
 
         addForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const firstName = document.getElementById("inputFirstname").value;
-                const lastName = document.getElementById("inputSurname").value;
-                const email = document.getElementById("inputEmail").value;
-                const phone = document.getElementById("inputPhone").value;
-                const dob = document.getElementById("inputDOB").value;
-                const res = await database
-                    .from("clients")
-                    .insert([
-                        {
+            e.preventDefault();
+            const firstName = document.getElementById("inputFirstname").value;
+            const lastName = document.getElementById("inputSurname").value;
+            const email = document.getElementById("inputEmail").value;
+            const phone = document.getElementById("inputPhone").value;
+            const dob = document.getElementById("inputDOB").value;
+            const res = await database
+                .from("clients")
+                .insert([
+                    {
                         firstName: firstName,
                         lastName: lastName,
                         email: email,
                         phone: phone,
                         dob: dob
-                        }
-                    ])
-                if (res) {
-                    window.location = "clients.html";
-                }
-            });
+                    }
+                ])
+            if (res) {
+                window.location = "clients.html";
+            }
+        });
 
     </script>
 </body>

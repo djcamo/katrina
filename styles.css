@@ -1,0 +1,16 @@
+:root {
+    --primary: #667B68;
+    --primary-hover: #a3b899;
+    --danger: #f8d3c5;
+    --danger-hover: #f5c2b0;
+}
+
+.btn-primary{background-color: var(--primary);border-color:var(--primary);}
+.btn-primary:hover{background-color: var(--primary-hover);border-color: var(--primary-hover);}
+.text-primary{color: var(--primary)!important;}
+.btn-danger{background-color: var(--danger);border-color:var(--danger);color:#000}
+.btn-danger:hover{background-color: var(--danger-hover);border-color: var(--danger-hover);}
+.active>.page-link, .page-link.active {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}

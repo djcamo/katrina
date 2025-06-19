@@ -9,6 +9,7 @@
         integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.3.1/b-3.2.3/datatables.min.css" rel="stylesheet"
         integrity="sha384-R7wkapUQamlWlio8XHReuG7aXbnzYTXnzDW6Q4TYPLZti5mC3bw+lCHq70tb653T" crossorigin="anonymous">
+        <link rel="stylesheet" href="styles.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
         integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/v/bs5/dt-2.3.1/b-3.2.3/datatables.min.js"
@@ -24,7 +25,7 @@
 
         ul.timeline:before {
             content: ' ';
-            background: #d4d9df;
+            background: #dde6d5;
             display: inline-block;
             position: absolute;
             left: 29px;
@@ -44,7 +45,7 @@
             display: inline-block;
             position: absolute;
             border-radius: 50%;
-            border: 3px solid darkmagenta;
+            border: 3px solid #a3b899;
             left: 20px;
             width: 20px;
             height: 20px;
@@ -53,23 +54,29 @@
     </style>
 </head>
 
-<body>
+<body class="bg-light">
     <div class="container pt-5">
         <div class="row pt-5">
             <div class="col-8 pt-5 mx-auto">
-                <h2 class="text-center text-primary">Client Notes for David</h2>
-                <button class="btn btn-secondary btn-sm" id="showNoteForm">Add Note</button>
-                <form class="pt-3" style="display:none" id="noteForm">
-                    <div class="row mb-3">
-                        <div class="col-sm-10">
-                            <textarea class="form-control" id="inputNote" required> </textarea>
+                <div class="card p-5">
+                    <h2 class="text-center text-primary">Client Notes for <span id="name"></span></h2>
+                    <div>
+                    <button class="btn btn-secondary btn-sm" id="showNoteForm">Add Note</button>
+                    </div>  
+                    
+                    <form class="pt-3" style="display:none" id="noteForm">
+                        <div class="row mb-3">
+                            <div class="col-sm-10">
+                                <textarea class="form-control" id="inputNote" required> </textarea>
+                            </div>
                         </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                    </form>
+                    <ul class="timeline" id="data"></ul>
+                    <div>
+                    <button class="btn btn-primary btn-sm" onclick="window.location ='clients.html'">Back to Client List</button>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm">Add</button>
-                </form>
-                <ul class="timeline" id="data"></ul>
-                <button class="btn btn-primary btn-sm" onclick="window.location ='clients.html'">Back to Client List</button>
-            </div>
+                </div>
         </div>
     </div>
 
@@ -85,6 +92,7 @@
 
         jQuery(document).ready(function () {
             getNotes(id);
+            getName(id);
 
             showNoteForm.addEventListener("click", () => {
                 noteForm.style.display = "block";
@@ -132,6 +140,16 @@
                     </li>`;
                     document.getElementById("data").innerHTML += row;
                 });
+            }
+        }
+
+        const getName = async (id) => {
+            const res = await database
+                .from("clients")
+                .select("*")
+                .eq('id', id);
+            if (res) {
+                document.getElementById("name").innerHTML = res.data[0].firstName;
             }
         }
 
