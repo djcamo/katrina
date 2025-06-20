@@ -9,13 +9,14 @@
         integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.3.1/b-3.2.3/datatables.min.css" rel="stylesheet"
         integrity="sha384-R7wkapUQamlWlio8XHReuG7aXbnzYTXnzDW6Q4TYPLZti5mC3bw+lCHq70tb653T" crossorigin="anonymous">
-        <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
         integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/v/bs5/dt-2.3.1/b-3.2.3/datatables.min.js"
         integrity="sha384-rxN9Fc7q8JWz3Cvn+kDax69/2Iw8AY+/0ODTk1A8ZbVct1HV/JC3fPex0qp62SWs"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
+
     <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
     <style>
         ul.timeline {
@@ -61,9 +62,9 @@
                 <div class="card p-5">
                     <h2 class="text-center text-primary">Client Notes for <span id="name"></span></h2>
                     <div>
-                    <button class="btn btn-secondary btn-sm" id="showNoteForm">Add Note</button>
-                    </div>  
-                    
+                        <button class="btn btn-secondary btn-sm" id="showNoteForm">Add Note</button>
+                    </div>
+
                     <form class="pt-3" style="display:none" id="noteForm">
                         <div class="row mb-3">
                             <div class="col-sm-10">
@@ -72,89 +73,132 @@
                         </div>
                         <button type="submit" class="btn btn-primary btn-sm">Add</button>
                     </form>
-                    <ul class="timeline" id="data"></ul>
+
+                    <form class="pt-3" style="display:none" id="noteEditForm">
+                        <div class="row mb-3">
+                            <div class="col-sm-10">
+                                <textarea class="form-control" id="inputNoteEdit" required> </textarea>
+                                <input type="hidden" id="noteId">
+                                <input type="hidden" id="clientId">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Edit</button>
+                    </form>
+
+                    <ul class="timeline pt-3" id="data"></ul>
                     <div>
-                    <button class="btn btn-primary btn-sm" onclick="window.location ='clients.html'">Back to Client List</button>
+                        <button class="btn btn-primary btn-sm" onclick="window.location ='clients.html'">Back to Client
+                            List</button>
                     </div>
                 </div>
+            </div>
         </div>
-    </div>
 
 
-    <script>
-        const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdGZpb2hmZWd0dGZhcGlhem5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Njc4ODc3ODEsImV4cCI6MTk4MzQ2Mzc4MX0.p_NdRX7tlhnAYxH1v2wSS85C620dxSpEhH-C3jwYBh8";
-        const url = "https://ectfiohfegttfapiazni.supabase.co";
-        const database = supabase.createClient(url, key);
-        let id = window.location.search.split("=")[1];
-        const showNoteForm = document.getElementById("showNoteForm");
-        const noteForm = document.getElementById("noteForm");
-        const data = document.getElementById("data");
+        <script>
+            const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdGZpb2hmZWd0dGZhcGlhem5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Njc4ODc3ODEsImV4cCI6MTk4MzQ2Mzc4MX0.p_NdRX7tlhnAYxH1v2wSS85C620dxSpEhH-C3jwYBh8";
+            const url = "https://ectfiohfegttfapiazni.supabase.co";
+            const database = supabase.createClient(url, key);
+            let clientId = window.location.search.split("=")[1];
+            const showNoteForm = document.getElementById("showNoteForm");
+            const noteForm = document.getElementById("noteForm");
+            const data = document.getElementById("data");
+            const inputNoteEdit = document.getElementById("inputNoteEdit");
 
-        jQuery(document).ready(function () {
-            getNotes(id);
-            getName(id);
+            jQuery(document).ready(function () {
+                getNotes(clientId);
+                getName(clientId);
 
-            showNoteForm.addEventListener("click", () => {
-                noteForm.style.display = "block";
-                showNoteForm.style.display = "none";
+                showNoteForm.addEventListener("click", () => {
+                    noteForm.style.display = "block";
+                    showNoteForm.style.display = "none";
+                });
+
+
+
+                noteForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const note = document.getElementById("inputNote").value;
+                    const res = await database
+                        .from("notes")
+                        .insert([{
+                            clientId: clientId,
+                            content: note
+                        }]);
+                    if (res) {
+                        data.innerHTML = "";
+                        getNotes(clientId);
+                        noteForm.style.display = "none";
+                        showNoteForm.style.display = "block";
+                    }
+                });
+
+                 noteEditForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const note = document.getElementById("inputNoteEdit").value;
+                    const id = document.getElementById("noteId").value;
+                    const res = await database
+                        .from("notes")
+                        .update([{
+                            content: note
+                        }])
+                        .eq('id', id);
+                    if (res) {
+                        data.innerHTML = "";
+                        noteEditForm.style.display = "none";
+                        showNoteForm.style.display = "block";
+                        getNotes(clientId);
+                        
+                    }
+                });
+
             });
 
-            noteForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const note = document.getElementById("inputNote").value;
+            const formatter = new Intl.DateTimeFormat('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const getNotes = async (id) => {
                 const res = await database
                     .from("notes")
-                    .insert([{
-                        clientId: id,
-                        content: note
-                    }]);
+                    .select("*")
+                    .eq('clientId', id)
+                    .order('created_at', { ascending: false });
                 if (res) {
-                    data.innerHTML = "";
-                    getNotes(id);
-                    noteForm.style.display = "none";
-                    showNoteForm.style.display = "block";
-                }
-            });
-
-        });
-
-        const formatter = new Intl.DateTimeFormat('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-
-        const getNotes = async (id) => {
-            const res = await database
-                .from("notes")
-                .select("*")
-                .eq('clientId', id)
-                .order('created_at', { ascending: false });
-            if (res) {
-                res.data.map(item => {
-                    const d = new Date(item.created_at);
-                    const formattedDate = formatter.format(d);
-                    let row = `<li>
+                    res.data.map(item => {
+                        const d = new Date(item.created_at);
+                        const formattedDate = formatter.format(d);
+                        let row = `<li>
                         <a>${formattedDate} </a>
                         <p> ${item.content} </p>
+                        <span class="btn btn-light btn-sm" onclick="editNote(${item.id},'${item.content}')">Edit</span>
                     </li>`;
-                    document.getElementById("data").innerHTML += row;
-                });
+                        document.getElementById("data").innerHTML += row;
+                    });
+                }
             }
-        }
 
-        const getName = async (id) => {
-            const res = await database
-                .from("clients")
-                .select("*")
-                .eq('id', id);
-            if (res) {
-                document.getElementById("name").innerHTML = res.data[0].firstName;
+            const getName = async (id) => {
+                const res = await database
+                    .from("clients")
+                    .select("*")
+                    .eq('id', id);
+                if (res) {
+                    document.getElementById("name").innerHTML = res.data[0].firstName;
+                }
             }
-        }
+
+            const editNote = (id,content) => {
+                noteEditForm.style.display = "block";
+                showNoteForm.style.display = "none";   
+                inputNoteEdit.value = content;
+                noteId.value = id;
+            }
 
 
-    </script>
+        </script>
 </body>
 
 </html>
